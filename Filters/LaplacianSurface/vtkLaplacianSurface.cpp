@@ -8,7 +8,7 @@
 #include <vtkPoints.h>
 #include <vtkCellArray.h>
 #include <vtkType.h>
-#include "include/VectorMath.h"
+#include "VectorMath.h"
 
 using namespace std;
 
@@ -16,8 +16,6 @@ vtkStandardNewMacro(vtkLaplacianSurface);
 
 // Default constructor.
 vtkLaplacianSurface::vtkLaplacianSurface() {
-    this->ControlIds = vtkIdList::New();
-    this->ControlPoints = vtkPoints::New();
     this->ver = vtkPoints::New();
     this->verPre = vtkPoints::New();
     this->verModify = vtkPoints::New();
@@ -29,30 +27,43 @@ vtkLaplacianSurface::vtkLaplacianSurface() {
     this->Threshold = 0.00001;
     this->Kernel = 1;
     this->DisplayFrames = 0;
+
+    this->SetNumberOfInputPorts(2);
 }
 
 // Destrucor
 vtkLaplacianSurface::~vtkLaplacianSurface() {
-    this->ControlIds->Delete();
-    this->ControlPoints->Delete();
     this->ver->Delete();
     this->verPre->Delete();
     this->verModify->Delete();
+    this->polys->Delete();
     this->writer->Delete();
 }
 
+vtkPointSet* vtkLaplacianSurface::GetControlPointsData()
+{
+  if (this->GetNumberOfInputConnections(1) < 1) {
+    return NULL;
+  }
+
+  return vtkPointSet::SafeDownCast(this->GetInputDataObject(1, 0));
+}
+
 void vtkLaplacianSurface::RoutineCheck(vtkPolyData* input) {
-    if (this->ControlIds->GetNumberOfIds() !=
+    if (!ControlIds
+        || !ControlPoints
+        || this->ControlIds->GetNumberOfTuples() == 0
+        || this->ControlPoints->GetNumberOfPoints() == 0)
+    {
+        cout << "Control Id or Control Point is empty" << endl;
+        exit(0);
+    }
+    if (this->ControlIds->GetNumberOfTuples() !=
             this->ControlPoints->GetNumberOfPoints()) {
         cout << "The number of control points and control ids should be the same" << endl;
         exit(0);
     }
-    if (this->ControlIds->GetNumberOfIds() == 0 ||
-            this->ControlPoints->GetNumberOfPoints() == 0) {
-        cout << "Control Id or Control Point is empty" << endl;
-        exit(0);
-    }
-    if (input->GetNumberOfPoints() < this->ControlIds->GetNumberOfIds()) {
+    if (input->GetNumberOfPoints() < this->ControlIds->GetNumberOfTuples()) {
         cout << "Control points are more then points in the data" << endl;
         exit(0);
     }
@@ -75,6 +86,12 @@ int vtkLaplacianSurface::RequestData(
                              inInfo->Get(vtkDataObject::DATA_OBJECT()));
     vtkPolyData *output = vtkPolyData::SafeDownCast(
                               outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+    vtkPointSet* ControlPointSet = this->GetControlPointsData();
+    this->ControlPoints = ControlPointSet->GetPoints();
+    this->ControlIds
+      = vtkIdTypeArray::SafeDownCast(this->GetInputArrayToProcess(0, ControlPointSet));
+
     // Do LSO for smoothing or do LSE for deformation
     if (this->IsOptimization == 1) {
         LSO(input, output);
@@ -82,10 +99,21 @@ int vtkLaplacianSurface::RequestData(
         this->RoutineCheck(input);
         LSE(input, output);
     } else {
-        cout << "Need to specify IsOptimization(1) or IsEditing(1)" << endl;
+        cout << "Need to specify the algorithm: Laplacian Mesh Optimization or Laplacian Surface Editing" << endl;
         exit(0);
     }
     return 1;
+}
+
+void vtkLaplacianSurface::SetAlgorithm(int algorithm)
+{
+  if(algorithm == 0) {
+    IsOptimization = 1;
+    IsEditing = 0;
+  } else {
+    IsOptimization = 0;
+    IsEditing = 1;
+  }
 }
 
 // meaning of variable names, see paper "Laplacian Mesh Optimization", formula (10)
@@ -93,7 +121,7 @@ void vtkLaplacianSurface::LSO(vtkPolyData* input, vtkPolyData* output) {
     output->DeepCopy(input);
     this->ver->DeepCopy(input->GetPoints());
     Matrix L = LMatrix(input);
-    int sizeIds = this->ControlIds->GetNumberOfIds();
+    int sizeIds = this->ControlIds->GetNumberOfTuples();
     int sizePts = L.RowNo();
     Matrix A(sizePts+sizeIds, L.ColNo());
     Matrix b(sizePts+sizeIds, 3);
@@ -105,9 +133,9 @@ void vtkLaplacianSurface::LSO(vtkPolyData* input, vtkPolyData* output) {
         b.PartCopy(delMatC);
     }
     for (int i=0; i<sizeIds; i++) {
-        A(sizePts+i, this->ControlIds->GetId(i)) = 1;
+        A(sizePts+i, this->ControlIds->GetValue(i)) = 1;
         double p[3];
-        this->ver->GetPoint(this->ControlIds->GetId(i), p);
+        this->ver->GetPoint(this->ControlIds->GetValue(i), p);
         b.SetRow(sizePts+i, p);
     }
 
@@ -135,10 +163,10 @@ void vtkLaplacianSurface::LSE(vtkPolyData* input, vtkPolyData* output) {
     vtkIdType sizePts = this->verPre->GetNumberOfPoints();
     this->verModify->DeepCopy(input->GetPoints());
     // Move control points to specific positions (this->ControlPoints)
-    for (int i=0; i<this->ControlIds->GetNumberOfIds(); i++) {
+    for (int i=0; i<this->ControlIds->GetNumberOfTuples(); i++) {
         double pt[3];
         this->ControlPoints->GetPoint(i, pt);
-        this->verModify->SetPoint(this->ControlIds->GetId(i), pt[0], pt[1], pt[2]);
+        this->verModify->SetPoint(this->ControlIds->GetValue(i), pt[0], pt[1], pt[2]);
     }
     Matrix verPreMat = pts2Matrix(this->verPre);
     Matrix verModifyMat = pts2Matrix(this->verModify);
@@ -223,7 +251,7 @@ void vtkLaplacianSurface::LSE(vtkPolyData* input, vtkPolyData* output) {
             tempGrids->DeepCopy(output);
             this->verModify = matrix2Pts(verModifyMat);
             tempGrids->SetPoints(this->verModify);
-            this->writer->SetInput(tempGrids);
+            this->writer->SetInputData(tempGrids);
             char fn[10];
             this->filename(this->DisplayFrames, fn);
             this->writer->SetFileName(fn);
@@ -233,12 +261,12 @@ void vtkLaplacianSurface::LSE(vtkPolyData* input, vtkPolyData* output) {
         }
         // Get error matrix
         Matrix verModifyMatPre = verModifyMat;
-        for (int i=0; i<this->ControlIds->GetNumberOfIds(); i++) {
+        for (int i=0; i<this->ControlIds->GetNumberOfTuples(); i++) {
             double pt[3];
             this->ControlPoints->GetPoint(i, pt);
-            verModifyMat(this->ControlIds->GetId(i), 0)=pt[0];
-            verModifyMat(this->ControlIds->GetId(i), 1)=pt[1];
-            verModifyMat(this->ControlIds->GetId(i), 2)=pt[2];
+            verModifyMat(this->ControlIds->GetValue(i), 0)=pt[0];
+            verModifyMat(this->ControlIds->GetValue(i), 1)=pt[1];
+            verModifyMat(this->ControlIds->GetValue(i), 2)=pt[2];
         }
         errMat = verModifyMatPre - verModifyMat;
         TMat.clear();
@@ -403,8 +431,12 @@ void vtkLaplacianSurface::filename(int i, char* c) {
 // VTK specific method:
 //      This method sets the input ports for this pipeline element.
 int vtkLaplacianSurface::FillInputPortInformation(int port, vtkInformation* info) {
+  if (port == 0)
     info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
-    return 1;
+  else
+    info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
+
+  return 1;
 }
 
 // VTK specific method:

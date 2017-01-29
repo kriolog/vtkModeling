@@ -1,0 +1,139 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+ <SourceProxy name="LaplacianSurface" class="vtkLaplacianSurface"
+     label="Laplacian Surface">
+     <Documentation
+        long_help="."
+        short_help=".">
+        TOTO
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkPolyData"/>
+           </DataTypeDomain>
+      </InputProperty>
+
+      <InputProperty
+        name="ControlPoints"
+        label="Control Points"
+        port_index="1"
+        command="SetInputConnection">
+        <Documentation>
+          Deformed Control Points
+        </Documentation>
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkPointSet"/>
+        </DataTypeDomain>
+        <InputArrayDomain
+          name="control_point_ids"
+          attribute_type="point"/>
+      </InputProperty>
+      <StringVectorProperty
+        command="SetInputArrayToProcess"
+        element_types="0 0 0 0 2"
+        name="ControlPointsIds"
+        label="Control Point IDs"
+        number_of_elements="5">
+        <ArrayListDomain
+          attribute_type="Scalars"
+          data_type="VTK_ID_TYPE"
+          number_of_elements="1"
+          name="array_list">
+          <RequiredProperties
+            input_domain_name="control_point_ids">
+            <Property
+              name="ControlPoints"
+              function="Input" />
+          </RequiredProperties>
+        </ArrayListDomain>
+        <Documentation>
+          Indices of control points
+        </Documentation>
+      </StringVectorProperty>
+
+      <IntVectorProperty
+        name="Algorithm"
+        command="SetAlgorithm"
+        number_of_elements="1"
+        default_values="0" >
+        <EnumerationDomain name="enum">
+          <Entry value="0" text="Laplacian Mesh Optimization"/>
+          <Entry value="1" text="Laplacian Surface Editing"/>
+        </EnumerationDomain>
+      </IntVectorProperty>
+
+      <IntVectorProperty command="SetIsCotangent"
+                         name="IsCotangent"
+                         default_values="0"
+                         number_of_elements="1">
+      <BooleanDomain name="bool" />
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="0" />
+      </Hints>
+      <Documentation>
+        Cotangent weight.
+      </Documentation>
+      </IntVectorProperty>
+
+      <DoubleVectorProperty command="SetThreshold"
+                         name="Threshold"
+                         default_values="0.00001"
+                         number_of_elements="1">
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        Stopping criterion.
+      </Documentation>
+      </DoubleVectorProperty>
+
+      <IntVectorProperty command="SetKernel"
+                         name="Kernel"
+                         default_values="1"
+                         number_of_elements="1">
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        Neighborhood max distance.
+      </Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty command="SetDisplayFrames"
+                         name="DisplayFrames"
+                         default_values="0"
+                         number_of_elements="1">
+      <BooleanDomain name="bool" />
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        Whether or not save each frame.
+      </Documentation>
+      </IntVectorProperty>
+
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

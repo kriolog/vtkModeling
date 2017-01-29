@@ -24,13 +24,13 @@ Author: Shaoting Zhang
 #define __vtkLaplacianSurface_h__
 
 #include <vtkPolyDataAlgorithm.h>
-#include <vtkIdList.h>
+#include <vtkIdTypeArray.h>
 #include <vector>
 #include <vtkPolyDataWriter.h>
 
 // For Matrix TCL, c++ lib for matrix operations
 // http://www.techsoftpl.com/matrix/download.htm
-#include "include/matrix.h"
+#include "matrix.h"
 #ifndef _NO_NAMESPACE
 using namespace std;
 using namespace math;
@@ -56,24 +56,24 @@ public:
     void PrintSelf(ostream& os, vtkIndent indent);
 
     //get parameters for lse
-    vtkSetObjectMacro(ControlIds, vtkIdList);	// Input, control points' id
-    vtkSetObjectMacro(ControlPoints, vtkPoints);// Input, control points' coordinates
-    vtkSetMacro(IsEditing, int);		// Set to 1 means Enable Laplacian Editing, default is 0
-    vtkSetMacro(IsOptimization, int);		// Set to 1 means Enable Laplacian Optimization, default is 0
     vtkSetMacro(IsCotangent, int);		// Set to 1 means Enable cotangent weight, default is 0
     vtkSetMacro(Threshold, double);             // Stopping criterion
     vtkSetMacro(Kernel, int);
     vtkSetMacro(DisplayFrames, int);            // Set to 1 means write each frame to disk (for displaying later)
 
+    void SetAlgorithm(int);
+
 protected:
     vtkLaplacianSurface();
     ~vtkLaplacianSurface();
+
+    vtkPointSet* GetControlPointsData();
 
     int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
     int FillInputPortInformation(int, vtkInformation*);
 
     //data
-    vtkIdList* ControlIds;   // control points' id
+    vtkIdTypeArray* ControlIds;   // control points' id
     vtkPoints* ControlPoints;// control points' coordinates
     int IsEditing;	     // use LSE
     int IsOptimization;	     // use LSO
