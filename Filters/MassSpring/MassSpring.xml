@@ -1,0 +1,125 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+ <SourceProxy name="MassSpring" class="vtkMassSpring"
+     label="Mass Spring">
+     <Documentation
+        long_help="Moving Least Square (currently only works for 2D)."
+        short_help="Moving Least Square (currently only works for 2D).">
+        See: Scott Schaefer, "Image Deformation Using Moving Least Square"
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkUnstructuredGrid"/>
+           </DataTypeDomain>
+      </InputProperty>
+
+      <InputProperty
+        name="ControlPoints"
+        label="Control Points"
+        port_index="1"
+        command="SetInputConnection">
+        <Documentation>
+          Deformed Control Points
+        </Documentation>
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkPointSet"/>
+        </DataTypeDomain>
+        <InputArrayDomain
+          name="control_point_ids"
+          attribute_type="point"/>
+      </InputProperty>
+      <StringVectorProperty
+        command="SetInputArrayToProcess"
+        element_types="0 0 0 0 2"
+        name="ControlPointsIds"
+        label="Control Point IDs"
+        number_of_elements="5">
+        <ArrayListDomain
+          attribute_type="Scalars"
+          data_type="VTK_ID_TYPE"
+          number_of_elements="1"
+          name="array_list">
+          <RequiredProperties
+            input_domain_name="control_point_ids">
+            <Property
+              name="ControlPoints"
+              function="Input" />
+          </RequiredProperties>
+        </ArrayListDomain>
+        <Documentation>
+          Indices of control points
+        </Documentation>
+      </StringVectorProperty>
+
+      <DoubleVectorProperty command="SetDistanceCoefficient"
+                         name="DistanceCoefficient"
+                         default_values="1"
+                         number_of_elements="1">
+      <Documentation>
+        Distance constraint coefficient.
+      </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty command="SetDampingCoefficient"
+                         name="DampingCoefficient"
+                         default_values="1"
+                         number_of_elements="1">
+      <Documentation>
+        Damping coefficient.
+      </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty command="SetDeltaT"
+                         name="DeltaT"
+                         default_values="0.001"
+                         number_of_elements="1">
+      <Documentation>
+        dt for every step.
+      </Documentation>
+      </DoubleVectorProperty>
+
+      <IntVectorProperty command="SetSteps"
+                         name="Steps"
+                         default_values="500"
+                         number_of_elements="1">
+      <IntRangeDomain min="1"
+                      name="range" />
+<!--                       max="9999" -->
+      <Documentation>
+        The amount of steps for simulation. Simulation time = Steps * DeltaT.
+      </Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty command="SetDisplayFrames"
+                         name="DisplayFrames"
+                         default_values="0"
+                         number_of_elements="1">
+      <IntRangeDomain min="0"
+                      name="range" />
+      <Documentation>
+        How many key frames (for displaying later) needed. Default is 0.
+      </Documentation>
+      </IntVectorProperty>
+
+      <DoubleVectorProperty command="SetMass"
+                         name="Mass"
+                         default_values="1"
+                         number_of_elements="1">
+      <Documentation>
+        Mass of all points (future work: specify different masses for different "layers").
+      </Documentation>
+      </DoubleVectorProperty>
+
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
