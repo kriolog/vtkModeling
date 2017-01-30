@@ -3,9 +3,11 @@
  <SourceProxy name="LaplacianSurface" class="vtkLaplacianSurface"
      label="Laplacian Surface">
      <Documentation
-        long_help="."
-        short_help=".">
-        TOTO
+        long_help="Laplacian Surface Editing and Optimization filters."
+        short_help="Laplacian Surface Editing and Optimization filters.">
+        See:
+        Andrew Nealen, "Laplacian Surface Optimization"
+        Olga Sorkine, "Laplacian Surface Editing"
      </Documentation>
      <InputProperty
         name="Input"
