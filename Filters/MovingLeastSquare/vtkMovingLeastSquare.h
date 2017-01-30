@@ -96,8 +96,6 @@ protected:
 private:
     vtkMovingLeastSquare(const vtkMovingLeastSquare&);  // Not implemented.
     void operator=(const vtkMovingLeastSquare&);        // Not implemented.
-
-    vtkIdType IsId(vtkIdTypeArray* ids, vtkIdType id);
 };
 
 #endif

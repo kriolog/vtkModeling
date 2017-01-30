@@ -6,6 +6,7 @@
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
 #include <vtkPoints.h>
+#include <utils.h>
 
 using namespace std;
 
@@ -73,11 +74,11 @@ int vtkMovingLeastSquare::RequestData(
     ptMat = pts2Matrix(this->pts);
 
     for (int i=0; i<this->pts->GetNumberOfPoints(); i++) {
-        if (this->IsId(this->Ids, i) != -1) {
-            (*ptMat)(i,0)=(*QMat)(this->IsId(this->Ids, i), 0);
-            (*ptMat)(i,1)=(*QMat)(this->IsId(this->Ids, i), 1);
+        if (IsId(this->Ids, i) != -1) {
+            (*ptMat)(i,0)=(*QMat)(IsId(this->Ids, i), 0);
+            (*ptMat)(i,1)=(*QMat)(IsId(this->Ids, i), 1);
             if (this->Dimension == 3) {
-                (*ptMat)(i,2)=(*QMat)(this->IsId(this->Ids, i), 2);
+                (*ptMat)(i,2)=(*QMat)(IsId(this->Ids, i), 2);
             }
             continue;
         }
@@ -272,13 +273,4 @@ int vtkMovingLeastSquare::FillInputPortInformation(int port, vtkInformation* inf
 //      to conform to the VTK tools.
 void vtkMovingLeastSquare::PrintSelf(ostream& os, vtkIndent indent) {
     vtkPolyDataAlgorithm::PrintSelf(os,indent);
-}
-
-vtkIdType vtkMovingLeastSquare::IsId(vtkIdTypeArray* ids, vtkIdType id)
-{
-  for(vtkIdType i = 0, N = ids->GetNumberOfTuples(); i < N; ++i) {
-    if (id == ids->GetValue(i))
-      return i;
-  }
-  return (-1);
 }
