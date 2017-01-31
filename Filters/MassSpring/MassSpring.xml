@@ -3,9 +3,9 @@
  <SourceProxy name="MassSpring" class="vtkMassSpring"
      label="Mass Spring">
      <Documentation
-        long_help="Moving Least Square (currently only works for 2D)."
-        short_help="Moving Least Square (currently only works for 2D).">
-        See: Scott Schaefer, "Image Deformation Using Moving Least Square"
+        long_help="Mass Spring System."
+        short_help="Mass Spring System.">
+        Almost the same as the Robust Deformable Model in IGST/SJTU
      </Documentation>
      <InputProperty
         name="Input"
