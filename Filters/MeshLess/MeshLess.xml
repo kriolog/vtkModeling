@@ -1,0 +1,142 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+ <SourceProxy name="MeshLess" class="vtkMeshLess"
+     label="Mesh Less">
+     <Documentation
+        long_help="Meshless Deformable model with LSE, or with Continuum Elasticity."
+        short_help="Meshless Deformable model with LSE, or with Continuum Elasticity.">
+        See : Xiaoxu Wang, "LV Motion and Strain Computation from tMRI based on
+        Meshless Deformable Models. Note, that Meshless with Continuum
+        Elasticity may not be correct.
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkPolyData"/>
+           </DataTypeDomain>
+      </InputProperty>
+
+      <InputProperty
+        name="ControlPoints"
+        label="Control Points"
+        port_index="1"
+        command="SetInputConnection">
+        <Documentation>
+          Deformed Control Points
+        </Documentation>
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkPointSet"/>
+        </DataTypeDomain>
+        <InputArrayDomain
+          name="control_point_ids"
+          attribute_type="point"/>
+      </InputProperty>
+      <StringVectorProperty
+        command="SetInputArrayToProcess"
+        element_types="0 0 0 0 2"
+        name="ControlPointsIds"
+        label="Control Point IDs"
+        number_of_elements="5">
+        <ArrayListDomain
+          attribute_type="Scalars"
+          data_type="VTK_ID_TYPE"
+          number_of_elements="1"
+          name="array_list">
+          <RequiredProperties
+            input_domain_name="control_point_ids">
+            <Property
+              name="ControlPoints"
+              function="Input" />
+          </RequiredProperties>
+        </ArrayListDomain>
+        <Documentation>
+          Indices of control points
+        </Documentation>
+      </StringVectorProperty>
+
+      <IntVectorProperty
+        name="Algorithm"
+        command="SetAlgorithm"
+        number_of_elements="1"
+        default_values="0" >
+        <EnumerationDomain name="enum">
+          <Entry value="0" text="Laplacian Volume Editing"/>
+          <Entry value="1" text="Continuum Elasticity Editing"/>
+        </EnumerationDomain>
+      </IntVectorProperty>
+
+      <IntVectorProperty command="SetSubdivision"
+                         name="Subdivision"
+                         default_values="10"
+                         number_of_elements="1">
+      <IntRangeDomain min="2"
+                      max="99"
+                      name="range" />
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        How many pieces divided along x axis.
+      </Documentation>
+      </IntVectorProperty>
+
+      <DoubleVectorProperty command="SetDeltaT"
+                         name="DeltaT"
+                         default_values="0.01"
+                         number_of_elements="1">
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        dt for every step.
+      </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty command="SetPoissonRatio"
+                         name="PoissonRatio"
+                         default_values="0.5"
+                         number_of_elements="1">
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        Poisson's ratio (material property).
+      </Documentation>
+      </DoubleVectorProperty>
+
+      <DoubleVectorProperty command="SetYoungModulus"
+                         name="YoungModulus"
+                         default_values="0.05"
+                         number_of_elements="1">
+      <Hints>
+        <PropertyWidgetDecorator type="GenericDecorator"
+                                 mode="visibility"
+                                 property="Algorithm"
+                                 value="1" />
+      </Hints>
+      <Documentation>
+        Young's Modulous (material property).
+      </Documentation>
+      </DoubleVectorProperty>
+
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

@@ -11,4 +11,5 @@ include_directories(common)
 
 add_subdirectory(Filters/LaplacianSurface)
 add_subdirectory(Filters/MassSpring)
+add_subdirectory(Filters/MeshLess)
 add_subdirectory(Filters/MovingLeastSquare)
