@@ -82,11 +82,6 @@ int vtkMeshLess::RequestData(
 }
 
 void vtkMeshLess::CE(vtkPolyData* input, vtkPolyData* output) {
-    std::cout << "IsLaplacianVolume " << IsLaplacianVolume << std::endl;
-    std::cout << "IsContinuumElasticity " << IsContinuumElasticity << std::endl;
-    std::cout << "Subdivision " << Subdivision << std::endl;
-    std::cout << "DeltaT " << DeltaT << std::endl;
-    std::cout << "YoungModulus " << YoungModulus << std::endl;
     output->DeepCopy(input);
     this->verPre->DeepCopy(input->GetPoints());
     vtkIdType sizePts = this->verPre->GetNumberOfPoints();
@@ -95,7 +90,6 @@ void vtkMeshLess::CE(vtkPolyData* input, vtkPolyData* output) {
         double pt[3];
         this->ControlPoints->GetPoint(i, pt);
         this->verModify->SetPoint(this->ControlIds->GetValue(i), pt[0], pt[1], pt[2]);
-        std::cout << ControlIds->GetValue(i) << " " << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
     }
     // Get all parameters such as volume, mass, speed, positions(verPreMat and verModifyMat)
     Matrix verOriMat = pts2Matrix(this->verPre);
