@@ -114,6 +114,7 @@ void vtkLaplacianSurface::SetAlgorithm(int algorithm)
     IsOptimization = 0;
     IsEditing = 1;
   }
+  this->Modified();
 }
 
 // meaning of variable names, see paper "Laplacian Mesh Optimization", formula (10)
